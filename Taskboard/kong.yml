@@ -1,0 +1,20 @@
+_format_version: "2.1"
+services:
+- name: auth-service
+  url: http://auth-service:3000
+  routes:
+  - name: auth-route
+    paths:
+    - /auth
+- name: board-service
+  url: http://board-service:3000
+  routes:
+  - name: board-route
+    paths:
+    - /boards
+- name: task-service
+  url: http://task-service:3000
+  routes:
+  - name: task-route
+    paths:
+    - /tasks

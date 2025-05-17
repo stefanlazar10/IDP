@@ -1,0 +1,56 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  # Registry-ul GitLab automat pentru proiect
+  IMAGE_REGISTRY: $CI_REGISTRY_IMAGE
+  # Folosește Docker-in-Docker pentru build
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+
+services:
+  - docker:dind
+
+before_script:
+  # Autentificare la registry
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_REGISTRY/auth-service:$CI_COMMIT_REF_SLUG auth-service
+    - docker build -t $IMAGE_REGISTRY/board-service:$CI_COMMIT_REF_SLUG board-service
+    - docker build -t $IMAGE_REGISTRY/task-service:$CI_COMMIT_REF_SLUG task-service
+    - docker build -t $IMAGE_REGISTRY/frontend:$CI_COMMIT_REF_SLUG frontend
+    - docker push $IMAGE_REGISTRY/auth-service:$CI_COMMIT_REF_SLUG
+    - docker push $IMAGE_REGISTRY/board-service:$CI_COMMIT_REF_SLUG
+    - docker push $IMAGE_REGISTRY/task-service:$CI_COMMIT_REF_SLUG
+    - docker push $IMAGE_REGISTRY/frontend:$CI_COMMIT_REF_SLUG
+  only:
+    - main
+    - develop
+
+test:
+  stage: test
+  script:
+    - cd auth-service && npm ci && npm run test
+    - cd ../board-service && npm ci && npm run test
+    - cd ../task-service && npm ci && npm run test
+    - cd ../frontend && npm ci && npm run test
+  only:
+    - merge_requests
+    - main
+
+deploy:
+  stage: deploy
+  script:
+    # Deploy pe Docker Swarm (pe runner-ul care are acces la cluster)
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker stack deploy --with-registry-auth -c docker-compose.yml taskboard
+  environment:
+    name: production
+    url: http://your-production-url
+  only:
+    - main

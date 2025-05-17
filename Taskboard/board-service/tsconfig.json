@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "module": "CommonJS",
+        "target": "ES2018",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "outDir": "dist",
+        "rootDir": "src",
+        "strict": true,
+        "skipLibCheck": true, // ignoră erorile din node_modules
+        "strictPropertyInitialization": false, // permite proprietățile fără initializer
+    },
+    "include": [
+        "src/**/*.ts"
+    ]
+}
