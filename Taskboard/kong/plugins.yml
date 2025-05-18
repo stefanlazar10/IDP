@@ -1,0 +1,47 @@
+_format_version: "1.1"
+plugins:
+  - name: jwt
+    service: auth-service
+    route: auth-login       
+      key_claim_name: iss
+      secret_is_base64: false
+
+  - name: jwt
+    service: task-service
+    route: task-crud
+    config:
+      key_claim_name: iss
+      secret_is_base64: false
+
+  - name: jwt
+    service: board-service
+    route: board-crud
+    config:
+      key_claim_name: iss
+      secret_is_base64: false
+
+ 
+  - name: rate-limiting
+    service: task-service
+    config:
+      minute: 100
+      policy: local
+
+  - name: rate-limiting
+    service: board-service
+    config:
+      minute: 100
+      policy: local
+
+ 
+  - name: cors
+    service: frontend
+    config:
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST
+        - PATCH
+        - DELETE
+      credentials: true

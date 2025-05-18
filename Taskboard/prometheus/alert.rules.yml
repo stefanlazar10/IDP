@@ -1,0 +1,33 @@
+groups:
+  - name: instance-status
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instanță {{ $labels.instance }} jos"
+          description: "Prometheus nu primește răspuns de la {{ $labels.instance }} de mai mult de 5 minute."
+
+  - name: resource-usage
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU încărcat (>85%) pe {{ $labels.instance }}"
+          description: "Utilizarea medie a CPU pe instanța {{ $labels.instance }} este peste 85% de 10 minute."
+
+  - name: disk-space
+    rules:
+      - alert: LowDiskSpace
+        expr: (node_filesystem_free_bytes{fstype!~\"tmpfs|aufs|overlay\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|aufs|overlay\"}) * 100 < 15
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Spațiu disc redus pe {{ $labels.mountpoint }}"
+          description: "Spațiul liber pe {{ $labels.mountpoint }} este sub 15% de 15 minute."

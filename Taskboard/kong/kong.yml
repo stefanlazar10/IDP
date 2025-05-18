@@ -1,0 +1,42 @@
+_format_version: "1.1"
+services:
+  - name: auth-service
+    url: http://auth-service:3001
+    routes:
+      - name: auth-login
+        paths:
+          - /auth/login
+      - name: auth-signup
+        paths:
+          - /auth/sign-up
+
+  - name: task-service
+    url: http://task-service:3002
+    routes:
+      - name: task-crud
+        paths:
+          - /tasks
+        methods: [GET, POST, PATCH, DELETE]
+
+  - name: board-service
+    url: http://board-service:3003
+    routes:
+      - name: board-crud
+        paths:
+          - /boards
+        methods: [GET, POST, PATCH, DELETE]
+
+  - name: frontend
+    url: http://frontend:80
+    routes:
+      - name: frontend-app
+        paths:
+          - /
+
+
+  - name: prometheus-metrics
+    url: http://prometheus:9090
+    routes:
+      - name: prometheus-metrics-route
+        paths:
+          - /metrics
